@@ -1,0 +1,419 @@
+#+title: Propuesta de proyecto
+#+author: Erik Rangel Limón
+#+startup: latexpreview
+
+
+* Propuestas
+
+** Primer propuesta
+
+   La idea original que tenía era hacer una biblioteca/programa
+   especial para realizar pruebas sobre distintas características de un
+   lenguaje de programación que se fuese a desarrollar en el curso de
+   Lenguajes de Programación.
+
+   La forma en la que en las prácticas se realizaban las pruebas era
+   por medio de un generador aleatorio de expresiones del lenguaje
+   /Minilisp/.
+
+   #+begin_src haskell
+expr :: Gen (String, Either Bool Double)
+expr = do
+  n <- chooseInt (0, 5)
+  genExpr n
+   #+end_src
+
+   Esta es la función principal del generador; lo que hace es elegir
+   aleatoriamente la profundidad del árbol (digamos $n$), y después
+   regresa el resultado del generador cuya profundidad del árbol es a
+   lo más $n$.
+
+   =expr= es del tipo de la mónada =Gen= y genera tuplas de =String=, la
+   expresión aleatoria generada en una cadena de texto, y algo de tipo
+   =Either Bool Double=, que es el resultado de evaluar la expresión
+   anterior.
+
+   =genExpr= tampoco es una función larga:
+
+   #+begin_src haskell
+genExpr :: Int -> Gen (String, Either Bool Double)
+genExpr n = do
+  b <- arbitrary
+  if b then do
+    (expr, bool) <- genBool n []
+    return (expr, Left bool)
+    else do
+    (expr, num) <- genNum n []
+    return (expr, Right num)
+   #+end_src
+
+   En esta únicamente se decide aleatoriamente una variable boleana =b=,
+   y si =b= es =True= se genera una expresión cuya evaluación final es
+   booleana, o una expresión numérica en otro caso.
+
+   El primer cambio que sugeriría para generalizar esto para /Minilisp/,
+   sería que tanto =expr= como =genExpr= pudieran regresar algo de
+   cualquier tipo de dato que pudiera ser útil para /Minilisp/.
+
+   Tendríamos que agregar los siguientes constructores:
+
+   #+begin_src haskell
+data GenType = Gbool
+             | Gint
+             | Gdouble
+             | Gchar
+             | Gstring
+             | Glist
+             | Gtlist
+
+data Result = Rbool Bool
+            | Rint Int
+            | Rdouble Double
+            | Rchar Char
+            | Rstring String
+            | Rlist [Result] -- | Listas heterogéneas
+            | Rtlist GenType [Result] -- | Listas homogéneas
+   #+end_src
+
+   Y modificar =expr= y =genExpr= de la siguiente forma:
+
+   #+begin_src haskell
+expr :: [GenType] -> Gen (String, Result)
+expr types = do
+  n <- chooseInt (0, 5)
+  genExpr types n
+   #+end_src
+
+   #+begin_src haskell
+genExpr :: [GenType] -> Int -> Gen (String, Either Bool Double)
+genExpr types n = do
+  t <- elements types
+  case t of
+    Gbool -> do
+      (expr, bool) <- genBool n []
+      return (expr, Left bool)
+    Gdouble -> do
+      (expr, num) <- genNum n []
+      return (expr, Right num)
+    -- ...
+   #+end_src
+
+   De esta forma, si para una práctica se requiere revisar únicamente
+   que se manejen los tipos de dato =Bool, Double, Char=, lo único que
+   habría que hacer sería llamar al generador indicando que necesitan
+   manejar esos tipos de dato en específico.
+
+   #+begin_src haskell
+ghci> generate $ expr [GBool, GDouble, GChar]
+("(if (= 'a' 'b') (/ 1.5 2) (10))", Rdouble 10.0)
+   #+end_src
+
+   El siguiente cambio a realizar sería en cada uno de los generadores
+   específicos (i.e. =genBool=, =genNum=)
+
+   Veamos =genNum=:
+
+   Su tipo es el siguiente:
+
+   #+begin_src haskell
+genNum :: Int -> Vars -> Gen (String, Double)
+   #+end_src
+
+   Donde el primer entero que se recibe corresponde a la profundidad y
+   =Vars= es una lista de variables definidas.
+
+   El caso base es relativamente simple, y es si la profundidad es 0,
+   en cuyo caso regresamos una expresión atómica, como un número (en
+   este caso), o una variable ligada cuyo valor sea numérico.
+
+   #+begin_src haskell
+genNum 0 vars
+  | null filteredVars = do
+      double <- arbitrary
+      return (show double, double)
+  | otherwise = do
+      new <- arbitrary
+      if new then do
+        double <- arbitrary
+        return (show double, double)
+        else do
+        (var,value) <- elements filteredVars
+        return (var, fromRight 0 value)
+  where
+    filteredVars = filter (isRight . snd) $ vars
+   #+end_src
+
+   La revisión que se hace es primero ver si la lista de variables es
+   vacía, en cuyo caso, crea siempre un número, en otro caso, se decide
+   aleatoriamente si deberíamos crear una variable nueva, o usar una ya
+   definida (que sea número).
+
+   El caso recursivo es ir decidiendo qué operaciones hacer:
+
+   #+begin_src haskell
+genNum n vars = do
+  k <- chooseInt (1,5)
+  op <- elements [ Gsum
+                 , Gsub
+                 , Gmul
+                 , Gdiv
+                 , Gadd1
+                 , Gsub1
+                 , Gsqrt
+                 , Gexpt
+                 , Glet
+                 , Glet1
+                 , Gfun
+                 , Gif
+                 , Gcond]
+  case op of
+    Gif -> do
+      (e1,b) <- chooseInt (0,n-1) >>= (`genBool` vars)
+      (e2,n2) <- chooseInt (0,n-1) >>= (`genNum` vars)
+      (e3,n3) <- chooseInt (0,n-1) >>= (`genNum` vars)
+      return ("(if " ++ e1 ++ " " ++ e2 ++ " " ++ e3 ++ ")", if b then n2 else n3)
+    -- | ...
+   #+end_src
+
+   Según que operación se haya decidido hacer se generan sus
+   subexpresiones recursivamente y según a qué se evalúen las
+   subexpresiones es como se calcula el resultado.
+
+   El principal cambio que haríamos en esta función es generalizar las
+   operaciones que debería haber, sería recibir esta lista de
+   operaciones como parámetro; el constructor de cada operación ya está
+   definido:
+
+   #+begin_src haskell
+data Genum = Gand
+           | Gor
+           | Gnot
+           | Glt
+           | Ggt
+           | Geq
+           | Gsum
+           | Gsub
+           | Gmul
+           | Gdiv
+           | Gadd1
+           | Gsub1
+           | Gsqrt
+           | Gexpt
+           | Glet
+           | Glet1
+           | Gfun
+           | Gif
+           | Gcond
+   #+end_src
+
+   Y por tanto el tipo de nuestra nueva función sería:
+
+   #+begin_src haskell
+genNum :: [Genum] -> Int -> Vars -> Gen (String, Double)
+   #+end_src
+
+   Y el caso recursivo sería como el siguiente:
+
+   #+begin_src haskell
+genNum ops n vars = do
+  k <- chooseInt (1,5)
+  op <- elements ops
+  case op of
+    Gif -> do
+      (e1,b) <- chooseInt (0,n-1) >>= (`genBool` vars)
+      (e2,n2) <- chooseInt (0,n-1) >>= (`genNum` vars)
+      (e3,n3) <- chooseInt (0,n-1) >>= (`genNum` vars)
+      return ("(if " ++ e1 ++ " " ++ e2 ++ " " ++ e3 ++ ")", if b then n2 else n3)
+  -- | ...
+   #+end_src
+
+   Haciendo estos principales cambios podríamos diseñar prácticas
+   dependiendo de qué funcionalidad de /Minilisp/ queremos que cuente;
+   principalmente qué tipos de dato queremos manejar, y qué operaciones
+   va a tener.
+
+** Segunda propuesta
+
+   De esta no tengo nada en especial preparado, pero algo que se me
+   ocurrió para extender el alcance de este proyecto para cualquier
+   lenguaje de programación que se quiera desarrollar, sería el hacer
+   un lenguaje de especificación con el que se puedan realizar
+   expresiones aleatorias dada una gramática.
+
+   Lo que estoy pensando es hacer una herramienta similar a /Happy/, que
+   por medio de su propio lenguaje de especificación, compile a un
+   código de Haskell, que en este caso sólo correspondería al generador
+   aleatorio de expresiones.
+
+   Por ejemplo:
+
+   #+begin_src prog
+num := int
+    | num "+" num
+    | num "-" num
+    | num "*" num
+    | num "/" num
+    | "(" num ")"
+   #+end_src
+
+   Y que en el código que genere pueda evaluarse algo como lo siguiente:
+
+   #+begin_src haskell
+ghci> generate $ gen_num
+"5+4*(3/2)"
+   #+end_src
+
+   Al menos en éste sentido, no se me ocurre una buena idea para que el
+   generador también calcule el resultado (como lo hacía en las
+   prácticas), ya que el especificar cómo debe ser la evaluación dentro
+   de éste archivo sería dar la respuesta de cómo debe implementar. 
+
+   Sin embargo una posibilidad para hacer estas pruebas sería tener un
+   programa que compare los resultados que regresó un intérprete en
+   específico (e.g. /Racket, Haskell, Python/) con lo que regresó la
+   implementación del lenguaje en /Haskell/.
+  
+* Trabajos similares
+
+  - https://metacpan.org/dist/yagg/view/random_generator
+
+  - https://stackoverflow.com/questions/4468086/any-tools-can-randomly-generate-the-source-code-according-to-a-language-grammar
+
+    - https://cs.baylor.edu/~maurer/dgl.html
+
+  - https://github.com/stefanik36/String-From-Grammar-Generator
+
+  - https://baturin.org/tools/bnfgen/
+
+
+  Lo novedoso que podríamos implementar para el trabajo de tesis
+  podría hacer un lenguaje que compile a /Haskell/ como /Happy/, y que en
+  el archivo de haskell que se cree haya múltiples generadores para
+  las distintas reglas de producción.
+
+  También podríamos añadir funcionalidades para que no sólo se creen
+  expresiones, sino que también semánticamente tengan sentido
+  (e.g. creación de variables, verificación de tipos).
+
+* Nombre del programa
+
+  La intención es que tenga un flujo de ejecución similar a /Happy/: Se
+  describe la gramática en un archivo, en la terminal el programa
+  "compilaría" este archivo y generaría un archivo de Haskell con una
+  serie de generadores y utilidades para usarse a discreción del
+  desarrolador.
+
+  Dado esto propongo que tenga el nombre de una emoción, haciendo
+  referencia a /Happy/, dejo aquí tres propuestas fáciles de recordar
+  que podrían quedar para el proyecto:
+
+  - Regret: Por si me arrepiento durante el desarrollo de esta
+    herramienta, pero incluso quedarían las siguientes siglas:
+
+    /Random Expression Generator Resource Engineering Tool/
+
+    /Random Expression Generator for Efficient Testing/
+    
+  - Joy: El nombre es corto y armoniza con /Happy/. Le quedarían las
+    siguientes siglas:
+
+    /Just Optimized Yielder/
+
+  - Hope: Empieza con /H/, pues va a ser en /Haskell/. Quedarían las
+    siguientes siglas.
+
+    /Haskell-Oriented Parser Engine/ (Aunque eso describiría mejor la
+    labor de Happy).
+
+* Diagrama de flujo
+
+  [[./diagrama_de_flujo.png]]
+
+  Ejemplo del archivo de la gramática;
+  
+    #+begin_src prog
+# grammar.joy
+num := int
+    | num "+" num
+    | num "-" num
+    | num "*" num
+    | num "/" num
+    | "(" num ")"
+  #+end_src
+  
+  Ejemplo de compilación:
+  
+  #+begin_src bash
+  $ joy grammar.joy
+  $
+  #+end_src
+
+  Ejemplo de resultado:
+
+  #+begin_src haskell
+-- | grammar.hs
+
+import Control.Monad
+import qualified Test.QuickCheck as QC
+
+-- Generador de números enteros aleatorios
+gen_int :: QC.Gen Int
+gen_int = QC.arbitrary
+
+-- Generador de expresiones numéricas aleatorias
+gen_num :: QC.Gen String
+gen_num = QC.oneof
+  [ fmap show gen_int  -- Genera un número entero
+  , do                 -- Genera una expresión binaria
+      num1 <- gen_num
+      num2 <- gen_num
+      op <- QC.elements ["+", "-", "*", "/"]
+      return $ "(" ++ num1 ++ " " ++ op ++ " " ++ num2 ++ ")"
+  , do                 -- Genera una expresión entre paréntesis
+      num <- gen_num
+      return $ "(" ++ num ++ ")"
+  ]
+
+-- Función para evaluar una expresión (simulada)
+eval :: String -> String -> IO String
+eval command expression = return expression  -- Simulación de evaluación
+
+-- Ejemplo de uso en GHCi
+-- Para generar una expresión aleatoria:
+--   generate gen_num
+  #+end_src
+
+  Ejemplo de uso en ghci:
+
+  #+begin_src bash
+ghci> import Test.QuickCheck
+ghci> :l grammar.hs
+ghci> generate gen_num
+"(3 + (5 * 2))"
+ghci> generate gen_num
+"((8 / 4) - 1)"
+ghci> generate gen_num
+"42"
+  #+end_src
+
+* Pendientes
+
+  - Plan de proyecto
+
+  - Bibliografía de Lenguajes
+
+  - Bibliografía de Compiladores
+
+  - Bibliografía de Declarativa
+
+  - EBNF
+
+  - Gramáticas con atributos (para tipos)
+
+  - EA
+
+  - Lets, Lambdas
+
+  - Lo demás...
+
+  - Repositorio de Git

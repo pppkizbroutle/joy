@@ -1,0 +1,214 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish, mexico]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{Alegreya}
+\usepackage{geometry}
+\geometry{
+  top = 10mm,
+  bottom = 10mm,
+  left = 10mm,
+  right = 10mm
+}
+
+\title{Plan de Proyecto}
+\author{Erik Rangel Limón}
+\date{}
+
+\makeatletter
+\def\@maketitle{
+  \begin{center}
+    {\Large\textbf{Plan de Proyecto}}
+  \end{center}
+}
+\makeatletter
+
+\begin{document}
+
+\pagenumbering{gobble}
+
+\maketitle
+
+\section*{Propuesta de Tema de Tesis}
+
+\subsection*{Título Tentativo}
+
+\noindent{\large\textbf{Joy: \textit{Just Optimized Yielder}}}
+
+\subsection*{Justificación}
+
+El desarrollo de lenguajes de programación es una tarea compleja que requiere herramientas eficientes para probar y validar la corrección de las gramáticas. Actualmente, muchas de las herramientas existentes para la generación de expresiones dada una gramática son generales y no están optimizadas para un enfoque declarativo, lo que dificulta su integración en flujos de trabajo modernos.
+
+Se propone la herramienta \textbf{Joy: \textit{Just Optimized Yielder}} como una solución que permita a los desarrolladores describir gramáticas de manera declarativa usando \textit{EBNF} (\textit{Extended Backus-Naur Form}) y generar automáticamente herramientas de prueba en \textit{Haskell}. Al utilizar un enfoque monádico para el análisis sintáctico y la generación de pruebas, \textbf{Joy} ofrece una forma eficiente y modular de validar lenguajes de programación. Además, al integrar generadores basados en QuickCheck, se garantiza que las pruebas sean robustas y cubran una amplia gama de casos.
+
+Esta herramienta no sólo simplifica el proceso de desarrollo de lenguajes, sino que también promueve el uso de técnicas funcionales y declarativas.
+
+\subsection*{Objetivos}
+
+\subsubsection*{Objetivo General}
+
+Desarrollar una herramienta llamada \textbf{Joy: \textit{Just Optimized Yielder}} que permita a los desarrolladores de lenguajes de programación generar automáticamente herramientas de prueba a partir de una descripción declarativa de la gramática en formato \textit{EBNF}
+
+\subsubsection*{Objetivos Específicos}
+
+\begin{enumerate}
+\item Implementar un analizador sintáctico en \textit{Haskell} que interprete archivos \texttt{.joy} con gramáticas descritas en formato \textit{EBNF}.
+\item Generar automáticamente código de \textit{Haskell} que incluya generadores de pruebas para cada regla de producción definida en la gramática.
+\item Integrar generadores basados en QuickCheck para garantizar la robustez de las pruebas.
+\item Permitir la configuración de parámetros adicionales para restringir tipos de datos o reglas de producción en los generadores.
+\item Opcional: Implementar la capacidad de evaluar cadenas generadas mediante un intérprete configurable.
+\item Documentar y validar la herramienta mendiante casos de estudio concretos.
+\end{enumerate}
+
+\section*{Descripción de los casos de estudio}
+
+Para validar la efectividad de \textit{Joy}, se proponen los siguientes casos de estudio:
+
+\begin{enumerate}
+\item \textit{Lenguaje de Expresiones Aritméticas}
+
+  \begin{itemize}
+  \item \textit{Descripción:} Un lenguaje simple que incluye operaciones básicas como suma, resta, multiplicación y división.
+  \item \textit{Objetivos:} Verificar que los generadores de pruebas cubran todas las combinaciones posibles de expresiones aritméticas.
+  \end{itemize}
+  
+\item \textit{Expresiones básicas en LISP}
+
+  \begin{itemize}
+  \item \textit{Descripción:} Un subconjunto del lenguaje \textit{LISP} con funcionalidades simples como la definición de variables mediante expresiones \texttt{let} y la aplicación de funciones.
+  \item \textit{Objetivo:} Validar que los generadores produzcan expresiones correctas tanto sintácticamente como semánticamente, y que estas puedan ser evaluadas en un intérprete como \textit{Racket}
+  \end{itemize}
+\end{enumerate}
+
+\section*{Metodología}
+
+\begin{enumerate}
+\item \textit{Investigación y Análisis}:
+
+  \begin{itemize}
+  \item Revisión del estado del arte en herramientas de generación de pruebas y análisis sintáctico.
+  \item Estudio de bibliotecas de \textit{Haskell} relevantes (\textit{QuickCheck},\textit{State},etc\ldots).
+  \end{itemize}
+\item \textit{Diseño}:
+
+  \begin{itemize}
+  \item Definición de la estructura de los archivos \texttt{.joy}
+  \item Diseño del analizador sintáctico basado en \textit{parsers} monádicos.
+  \item Diseño de los generadores de pruebas y su integración con \textit{QuickCheck}
+  \end{itemize}
+\item \textit{Implementación}:
+
+  \begin{itemize}
+  \item Desarrollo del analizador sintáctico en \textit{Haskell}.
+  \item Implementación de los generadores de pruebas automáticos.
+  \item Integración de parámetros adicionales para restricciones en los generadores.
+  \item Implementación opcional de la evaluación mediante intérpretes externos.
+  \end{itemize}
+\item \textit{Validación}:
+
+  \begin{itemize}
+  \item Pruebas unitarias y de integración por cada componente.
+  \item Aplicación de los casos de estudio para validar la funcionalidad de \textbf{Joy}
+  \end{itemize}
+\item \textit{Documentación}
+  
+  \begin{itemize}
+  \item Redacción de la documentación técnica y del usuario.
+  \item Preparación de ejemplos y tutoriales.
+  \end{itemize}
+
+\item \textit{Evaluación y Mejora}:
+
+  \begin{itemize}
+  \item Revisión de los resultados.
+  \item Identificación de áreas de mejora y optimización.
+  \end{itemize}
+\end{enumerate}
+
+\section*{Resultados Esperados}
+
+Se espera que \textbf{Joy} sea una herramienta funcional y eficiente que cumpla con los siguientes resultados:
+
+\begin{itemize}
+\item Generación automática de pruebas a partir de gramáticas descritas en \textit{EBNF}.
+\item Integración exitosa con \textit{QuickCheck} para la generación de casos de prueba robustos.
+\item Capacidad para manejar gramáticas complejas con restricciones específicas.
+\item Documentación clara y ejemplos que faciliten su uso por parte de otros desarrolladores.
+\item Validación exitosa mediante los casos de estudio propuestos.
+\end{itemize}
+
+Además, se espera que \textbf{Joy} sirva como una contribución significativa al campo de desarrollo de lenguajes de programación, promoviendo el uso de técnicas declarativas y funcionales.
+
+\section*{Índice Propuesto}
+
+El documento de la tesis seguirá la siguiente estructura:
+
+\begin{enumerate}
+\item \textbf{Introducción}
+  
+  \begin{itemize}
+  \item Contexto y motivación.
+  \item Objetivos del proyecto.
+  \end{itemize}
+
+\item \textbf{Estado del Arte}
+
+  \begin{itemize}
+  \item Herramientas existentes para generación de pruebas.
+  \item Análisis sintáctico en \textit{Haskell}.
+  \end{itemize}
+
+\item \textbf{Diseño de Joy}
+
+  \begin{itemize}
+  \item Descripción de la herramienta.
+  \item Especificación del formato \texttt{.joy}
+  \item Arquitectura del sistema.
+  \end{itemize}
+
+\item \textbf{Implementación}
+
+  \begin{itemize}
+  \item Analizador sintáctico.
+  \item Generadores de pruebas.
+  \item Integración con \textit{QuickCheck}.
+  \item Funcionalidads opcionales.
+  \end{itemize}
+  
+\item \textbf{Casos de Estudio}
+
+  \begin{itemize}
+  \item Lenguaje de expresiones aritméticas.
+  \item Expresiones básicas en \textit{LISP}.
+  \end{itemize}
+
+\item \textbf{Resultados y Discusión}
+
+  \begin{itemize}
+  \item Evaluación de la herramienta.
+  \item Limitaciones y áreas de mejora.
+  \end{itemize}
+
+\item \textbf{Conclusiones y Trabajo Futuro}
+
+  \begin{itemize}
+  \item Conclusiones del proyecto.
+  \item Posibles extensiones y mejoras.
+  \end{itemize}
+\item \textbf{Referencias}
+
+  \begin{itemize}
+  \item Bibliografía y recursos utilizados.
+  \end{itemize}
+
+\item \textbf{Anexos}
+
+  \begin{itemize}
+  \item Código fuente
+  \item Manual de usuario
+  \end{itemize}
+\end{enumerate}
+
+\section*{Bibliografía}
+
+\end{document}
