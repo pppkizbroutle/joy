@@ -1,0 +1,140 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish, mexico]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{Alegreya}
+\usepackage{geometry}
+\geometry{
+  top = 10mm,
+  bottom = 10mm,
+  left = 10mm,
+  right = 10mm
+}
+
+\title{Diseño}
+\author{Erik Rangel Limón}
+\date{}
+
+\makeatletter
+\def\@maketitle{
+  \begin{center}
+    {\Large\textbf{\@title}}
+  \end{center}
+}
+\makeatletter
+
+\begin{document}
+
+\maketitle
+
+\pagenumbering{gobble}
+
+\section*{Estructura sintáctica}
+
+En principio, la estructura sintáctica podría seguir el estándar \textsc{Iso/Iec 14977} para \textbf{EBNF} (\textit{Extended Backus-Naur Form}), con algunas extensiones adicionales. El objetivo es que los archivos \texttt{.joy} sean legibles y fáciles de entender para los desarrolladores de lenguajes, facilitando así la descripción de gramáticas.
+
+Las principales características definidas en éste estandar son las siguientes:
+
+\begin{itemize}
+\item \textit{Definición}
+
+  Con éste se definen nuevas reglas de producción:
+
+\begin{verbatim}
+primera regla = ...
+segunda regla = ...
+\end{verbatim}
+
+\item \textit{Cadena terminal}
+
+  Con ella se definen una cadena terminal dentro de una regla de producción:
+
+\begin{verbatim}
+primera regla = "a"
+seguda regla = 'b'
+\end{verbatim}
+
+\item \textit{Concatenación}
+
+  Permite la secuenciación de distintas reglas
+  
+\begin{verbatim}
+primera regla = "a" , "b"
+\end{verbatim}
+
+Esta regla en principio sólo podría producir la cadena ``ab''
+
+\item \textit{Alternación}
+
+  Permite alternativas para una regla de producción.
+
+\begin{verbatim}
+ primera regla = "a" | "b" | "c"
+\end{verbatim}
+
+Esta regla produce o bien el caracter ``a'', el caracter ``b'' o el caracter ``c''.
+
+\item \textit{Terminación}
+
+  Para indicar el final de la regla de producción
+
+\begin{verbatim}
+ primera regla = "a" | "b" | "c" ;
+\end{verbatim}
+
+\item \textit{Opción}
+
+  Para indicar que una expresión puede no estar, o aparecer una vez.
+
+\begin{verbatim}
+ primera regla = ["a" | "b" | "c"] , "d" ;
+\end{verbatim}
+
+Esta regla produce las cadenas ``d'', ``ad'', ``bd'', ``cd''.
+
+\item \textit{Repetición}
+
+  Para indicar que una expresión puede no estar, o estar un número no determinado de veces.
+
+\begin{verbatim}
+primera regla = {"a" | "b" | "c"} , "d" ;
+\end{verbatim}
+
+Esta regla produce cadenas que comienzan con una cantidad arbitraria de ``a'', ``b'' y ``c'' (incluyendo cero, en cualquier orden) que terminan en ``d''.
+
+\item \textit{Agrupación}
+
+  Para indicar que una expresión se debe considerar como una sóla.
+
+\begin{verbatim}
+primera regla = (a | b) , c 
+\end{verbatim}
+
+Esta regla produce las cadenas ``ac'' y ``bc''
+
+\item \textit{Excepción}
+
+  Esta regla permite indicar la diferencia entre conjuntos.
+
+\begin{verbatim}
+primera regla = (a | b), c
+segunda regla = primera regla - "ac"
+\end{verbatim}
+
+En este caso la segunda regla sólo puede producir la cadena ``bc''
+
+\item \textit{Secuencias especiales}
+
+  Esta regla permitiría incluir conjuntos predefinidos en el lenguaje, por ejemplo: enteros de 32 bits, enteros de 64 bits, números de punto flotante, cadenas de texto minúsculas, cadenas de texto en mayúsculas, cadenas numéricas, símbolos especiales, etc...
+
+\begin{verbatim}
+primera regla = ? int64 ?
+              | ? float ?
+              | primera regla + primera regla
+\end{verbatim}
+
+Esta regla permitiría sumas entre números de punto flotante y enteros de 64 bits
+
+\end{itemize}
+
+\end{document}
