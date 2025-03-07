@@ -1,8 +1,9 @@
-\documentclass[12pt]{article}
+\documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[spanish, mexico]{babel}
 \usepackage[T1]{fontenc}
 \usepackage{Alegreya}
+\usepackage{xurl}
 \usepackage{geometry}
 \geometry{
   top = 10mm,
@@ -37,27 +38,27 @@
 
 \subsection*{Justificación}
 
-El desarrollo de lenguajes de programación es una tarea compleja que requiere herramientas eficientes para probar y validar la corrección de las gramáticas. Actualmente, muchas de las herramientas existentes para la generación de expresiones dada una gramática son generales y no están optimizadas para un enfoque declarativo, lo que dificulta su integración en flujos de trabajo modernos.
+El desarrollo de lenguajes de programación es una tarea compleja que requiere herramientas eficientes para probar y validar la corrección de las gramáticas. Actualmente, muchas de las herramientas existentes para la generación de expresiones dada una gramática son generales y no están optimizadas para un enfoque declarativo, lo que dificulta su integración en flujos de trabajo modernos; por ejemplo, la herramienta \textit{yagg}\cite{yagg} cuenta con una línea de comandos para generar expresiones aleatorias dada una gramática, pero no sólo fue programado imperativamente, sino también las configuraciones de las cadenas están limitadas, y no es posible especificar la creación de cadenas que sean correctas semánticamente, lo que dificulta su uso para realizar pruebas en la implementación de un lenguaje de programación; también está la herramienta \textit{DGL}\cite{dgl} que tiene la capacidad de determinar el peso para determinar las frecuencias de las reglas de producción, y una documentación extensa para extender la funcionalidad del programa, sin embargo al ser un programa por separado, se dificulta su uso dentro de un entorno declarativo, pues en él se intenta prescindir lo más posible de los efectos secundarios, y su uso para realizar pruebas implicaría tener una constante comunicación con el Sistema Operativo, lo cual no es ideal.
 
-Se propone la herramienta \textbf{Joy: \textit{Just Optimized Yielder}} como una solución que permita a los desarrolladores describir gramáticas de manera declarativa usando \textit{EBNF} (\textit{Extended Backus-Naur Form}) y generar automáticamente herramientas de prueba en \textit{Haskell}. Al utilizar un enfoque monádico\footnote[1]{Las mónadas son un patrón de diseño comúnmente utilizados en lenguajes de programación funcionales que permiten una abstracción puramente funcional de tareas que involucrarían el uso de efectos secundarios. En este proyecto principalmente se utilizaría para tener control del estado del programa durante el análisis sintáctico, así como describir la manipulación el flujo de la información generada aleatoriamente.} para el análisis sintáctico y la generación de pruebas, \textbf{Joy} ofrece una forma eficiente y modular de validar lenguajes de programación. Además, al integrar generadores basados en \textit{QuickCheck}, se garantiza que las pruebas sean robustas y cubran una amplia gama de casos.
+Este proyecto propone la herramienta \textbf{Joy: \textit{Just Optimized Yielder}}, la cual permite a los desarrolladores definir gramáticas de manera declarativa usando \textit{EBNF} (\textit{Extended Backus-Naur Form}) y generar automáticamente herramientas de prueba para el desarrollo de un lenguaje de programación en \textit{Haskell}. Al utilizar un enfoque monádico\footnote[1]{Las mónadas son una estructura algebráica utilizada para manejar secuencias de operaciones que involucran contextos computacionales o efectos secundarios, como manejo de errores, estado, entrada/salida, o cálculos no determinísticos. En este proyecto principalmente se utilizaría para tener control del estado del programa durante el análisis sintáctico, así como describir la manipulación del flujo de la información generada aleatoriamente.} para el análisis sintáctico y la generación de pruebas, \textbf{Joy} ofrece una forma eficiente y modular de validar lenguajes de programación. Además, al integrar generadores basados en \textit{QuickCheck}\cite{quickcheck_manual}, se garantiza que las pruebas sean robustas y cubran una amplia gama de casos.
 
-Esta herramienta no sólo simplifica el proceso de desarrollo de lenguajes, sino que también promueve el uso de técnicas funcionales y declarativas.
+En el ámbito académico, Joy pretende contribuir al estudio de lenguajes formales y programación funcional, integrando técnicas como analizadores sintácticos monádicos y generadores de pruebas basados en propiedades (\textit{QuickCheck}), fomentando la investigación en métodos eficientes para el análisis sintáctico y la generación automática de pruebas. Y en el ámbito práctico, Joy pretende simplificar el desarrollo de lenguajes de programación al automatizar la creación de herramientas de validación, reduciendo el tiempo y esfuerzo requeridos para probar gramáticas y mejorando la calidad de los lenguajes mediante pruebas robustas. Su enfoque declarativo y modular lo hace adaptable a diversos contextos, desde lenguajes de dominio específico hasta lenguajes de propósito general, posicionándolo como una solución versátil y valiosa tanto para la industria como para la academia.
 
 \subsection*{Objetivos}
 
 \subsubsection*{Objetivo General}
 
-Desarrollar una herramienta llamada \textbf{Joy: \textit{Just Optimized Yielder}} que permita a los desarrolladores de lenguajes de programación generar automáticamente herramientas de prueba a partir de una descripción declarativa de la gramática en formato \textit{EBNF}
+Desarrollar una herramienta llamada \textbf{Joy: \textit{Just Optimized Yielder}} que permita a los desarrolladores de lenguajes de programación generar automáticamente casos de prueba para validar gramáticas en formato \textit{EBNF}.
 
 \subsubsection*{Objetivos Específicos}
 
 \begin{enumerate}
-\item Implementar un analizador sintáctico en \textit{Haskell} que interprete archivos \texttt{.joy} con gramáticas descritas en formato \textit{EBNF}.
-\item Generar automáticamente código de \textit{Haskell} que incluya generadores de pruebas para cada regla de producción definida en la gramática.
+\item Implementar un analizador sintáctico en \textit{Haskell} que interprete archivos \texttt{.joy} con gramáticas descritas en formato \textit{EBNF}. Éste formato a diferencia del estándar utilizado para el generador de analizadores sintácticos \textit{YACC}, tendría el objetivo de ser el punto de partida para el desarrollo, teniendo una estructura de fácil comprensión, y pueda funcionar así mismo como documentación para el lenguaje de programación.
+\item Generar automáticamente código de \textit{Haskell} que incluya generadores de pruebas para cada regla de producción definida en la gramática. Estos generadores seguirían un enfoque basado en propiedades.
 \item Integrar generadores basados en \textit{QuickCheck} para garantizar la robustez de las pruebas.
 \item Permitir la configuración de parámetros adicionales para restringir tipos de datos, determinar las reglas de producción a usar en los generadores, o determinar el tamaño de la longitud del árbol.
 \item Opcional: Implementar la capacidad de evaluar cadenas generadas mediante un intérprete configurable.
-\item Documentar y validar la herramienta mendiante casos de estudio concretos.
+\item Documentar y validar la herramienta mediante casos de estudio concretos.
 \end{enumerate}
 
 \section*{Descripción de los casos de estudio}
@@ -69,14 +70,14 @@ Para validar la efectividad de \textit{Joy}, se proponen los siguientes casos de
 
   \begin{itemize}
   \item \textit{Descripción:} Un lenguaje simple que incluye operaciones básicas como suma, resta, multiplicación y división.
-  \item \textit{Objetivos:} Verificar que los generadores de pruebas cubran la mayor cantidad de combinaciones posibles de expresiones aritméticas.
+  \item \textit{Objetivos:} Evaluar que los generadores de pruebas produzcan una cobertura representativa de las expresiones aritméticas permitidas por la gramática.
   \end{itemize}
   
 \item \textit{Expresiones básicas en LISP}
 
   \begin{itemize}
   \item \textit{Descripción:} Un subconjunto del lenguaje \textit{LISP} con funcionalidades simples como la definición de variables mediante expresiones \texttt{let} y la aplicación de funciones.
-  \item \textit{Objetivo:} Validar que los generadores produzcan expresiones correctas tanto sintácticamente como semánticamente, y que estas puedan ser evaluadas en un intérprete como \textit{Racket}
+  \item \textit{Objetivo:} Validar que los generadores produzcan expresiones correctas tanto sintácticamente como semánticamente con ayuda de un intérprete externo, como \textit{Racket}.
   \end{itemize}
 
 \item \textit{Programación implerativa}
@@ -96,12 +97,13 @@ Para validar la efectividad de \textit{Joy}, se proponen los siguientes casos de
   \begin{itemize}
   \item Revisión del estado del arte en herramientas de generación de pruebas y análisis sintáctico.
   \item Estudio de bibliotecas de \textit{Haskell} relevantes (\textit{QuickCheck},\textit{State},etc\ldots).
+  \item Estudio de bibliotecas similares en otros lenguajes.
   \end{itemize}
 \item \textit{Diseño}:
 
   \begin{itemize}
-  \item Definición de la estructura sintáctica de los archivos \texttt{.joy}
-  \item Diseño del analizador sintáctico basado en \textit{parsers} monádicos.
+  \item Definición de la estructura sintáctica de los archivos \texttt{.joy}, que a diferencia de otros como el del lenguaje de especificación de \textit{Happy}\cite{happy_docs}, seguirá el estandar \textsc{Iso/Iec 14977} de \textit{EBNF} para una mejor comprensión de la gramática.
+  \item Diseño del analizador sintáctico basado en \textit{parsers} monádicos desde cero.
   \item Diseño de los generadores de pruebas y su integración con \textit{QuickCheck}
   \end{itemize}
 \item \textit{Implementación}:
@@ -109,14 +111,25 @@ Para validar la efectividad de \textit{Joy}, se proponen los siguientes casos de
   \begin{itemize}
   \item Desarrollo del analizador sintáctico en \textit{Haskell}.
   \item Implementación de la traducción automática de \textit{EBNF} a generadores aleatorios en \textit{QuickCheck}.
-  \item Integración de parámetros adicionales para restricciones en los generadores.
+  \item Integración de parámetros adicionales para restricciones en los generadores, como longitud de las cadenas generadas, exclusión de reglas de producción, pesos que determinen la frecuencia de las reglas de producción, entre otras.
   \item Implementación opcional de la evaluación mediante intérpretes externos.
   \end{itemize}
 \item \textit{Validación}:
 
   \begin{itemize}
-  \item Pruebas unitarias y de integración por cada componente.
   \item Aplicación de los casos de estudio para validar la funcionalidad de \textbf{Joy}
+
+  \item Pruebas unitarias y de integración por cada componente
+
+    \begin{itemize}
+    \item Comprobar que las expresiones generadas siguen la estructura sintáctica que se definió.
+    \item Verificar que las expresiones cumplen con las restricciones que se especificaron al generador.
+    \item Corroborar que se crean expresiones semánticamente correctas mediante el uso de intérpretes externos.
+      
+    \item Probar la extensibilidad de las pruebas y su integración con \textit{QuickCheck}.
+
+    \item Comparar el tiempo de compilación con el de otras herramientas similares (e.g. \textit{Happy}).
+    \end{itemize}
   \end{itemize}
 \item \textit{Redacción del Trabajo de Tesis}
   
@@ -138,12 +151,11 @@ Para validar la efectividad de \textit{Joy}, se proponen los siguientes casos de
 Se espera que \textbf{Joy} sea una herramienta funcional y eficiente que cumpla con los siguientes resultados:
 
 \begin{itemize}
-\item Generación automática de pruebas a partir de gramáticas descritas en \textit{EBNF}.
-  % Generacion de expresiones
+\item Generación automática de expresiones a partir de gramáticas descritas en \textit{EBNF}.
 \item Integración exitosa con \textit{QuickCheck} para la generación de casos de prueba robustos.
-\item Capacidad para manejar gramáticas complejas con restricciones específicas.
+\item Capacidad para manejar gramáticas libres del contexto, como lenguajes de programación de propósito específico.
 \item Documentación clara y ejemplos que faciliten su uso por parte de otros desarrolladores.
-\item Validación exitosa mediante los casos de estudio propuestos.
+\item Validación exitosa de cada componente, mediante los casos de estudio propuestos y las pruebas unitarias mencionadas.
 \end{itemize}
 
 Además, se espera que \textbf{Joy} sirva como una contribución significativa al campo de desarrollo de lenguajes de programación, promoviendo el uso de técnicas declarativas y funcionales.
@@ -158,9 +170,8 @@ El documento de la tesis seguirá la siguiente estructura:
   \begin{itemize}
   \item Contexto y motivación.
   \item Objetivos del proyecto.
+  \item Antecedentes: analizadores sintáticos monádicos, proceso del compilador, \textit{QuickCheck} y sus módulos.
   \end{itemize}
-
-  %% Antecedentes: explicacion de analizador sintactico, etc... (conocimientos previos)
 
 \item \textbf{Estado del Arte}
 
@@ -183,14 +194,15 @@ El documento de la tesis seguirá la siguiente estructura:
   \item Analizador sintáctico.
   \item Generadores de pruebas.
   \item Integración con \textit{QuickCheck}.
-  \item Funcionalidads opcionales.
+  \item Funcionalidades opcionales.
   \end{itemize}
   
 \item \textbf{Casos de Estudio}
 
   \begin{itemize}
   \item Lenguaje de expresiones aritméticas.
-  \item Expresiones básicas en \textit{LISP}.
+  \item Subconjunto del lenguaje \textit{LISP}.
+  \item Lenguaje imperativo de propósito específico.
   \end{itemize}
 
 \item \textbf{Resultados y Discusión}
@@ -221,7 +233,7 @@ El documento de la tesis seguirá la siguiente estructura:
   \end{itemize}
 \end{enumerate}
 
-\begin{thebibliography}{10}
+\begin{thebibliography}{12}
 \bibitem{lyah} 
   Lipovaca, M. (2011). \textit{Learn you a Haskell for great good! A beginner's guide} (1st ed.). No Starch Press.
 
@@ -242,6 +254,21 @@ El documento de la tesis seguirá la siguiente estructura:
 
 \bibitem{ccpp}
   Louden, K. C. (1997). \textit{Compiler construction: Principles and practice}. PWS Publishing Company.
+
+\bibitem{ebnf}
+  International Organization for Standardization. (1996). \textit{Information technology — Syntactic metalanguage — Extended BNF} (ISO/IEC 14977:1996). Recuperado de \url{https://www.cl.cam.ac.uk/~mgk25/iso-14977.pdf}
+
+\bibitem{yagg}
+  Coppit, D. (2018, julio). \textit{Random generator manual}. Recuperado de \url{https://metacpan.org/dist/yagg/view/random_generator}
+
+\bibitem{dgl}
+  Maurer, H. A. (n.d.). \textit{DGL manual}. Recuperado de \url{https://cs.baylor.edu/~maurer/aida/dgl-source/documentation/dglmanul.pdf}
+
+\bibitem{quickcheck_manual}
+  Claessen, K., \& Hughes, J. (n.d.). \textit{QuickCheck manual}. Recuperado de \url{https://www.cse.chalmers.se/~rjmh/QuickCheck/manual.html}
+
+\bibitem{happy_docs}
+  Happy. (n.d.). \textit{Happy documentation}. Recuperado de \url{https://haskell-happy.readthedocs.io/en/latest/}
   
 \end{thebibliography}
 
