@@ -38,7 +38,7 @@
 
 \subsection*{Justificación}
 
-El desarrollo de lenguajes de programación es una tarea compleja que requiere herramientas eficientes para probar y validar la corrección de las gramáticas. Actualmente, muchas de las herramientas existentes para la generación de expresiones dada una gramática son generales y no están optimizadas para un enfoque declarativo, lo que dificulta su integración en flujos de trabajo modernos; por ejemplo, la herramienta \textit{yagg}\cite{yagg} cuenta con una línea de comandos para generar expresiones aleatorias dada una gramática, pero no sólo fue programado imperativamente, sino también las configuraciones de las cadenas están limitadas, y no es posible especificar la creación de cadenas que sean correctas semánticamente, lo que dificulta su uso para realizar pruebas en la implementación de un lenguaje de programación; también está la herramienta \textit{DGL}\cite{dgl} que tiene la capacidad de determinar el peso para determinar las frecuencias de las reglas de producción, y una documentación extensa para extender la funcionalidad del programa, sin embargo al ser un programa por separado, se dificulta su uso dentro de un entorno declarativo, pues en él se intenta prescindir lo más posible de los efectos secundarios, y su uso para realizar pruebas implicaría tener una constante comunicación con el Sistema Operativo, lo cual no es ideal.
+El desarrollo de lenguajes de programación es una tarea compleja que requiere herramientas eficientes para probar y validar la corrección de las gramáticas. Las herramientas actuales como \textit{Yagg}\cite{yagg} y \textit{DGL}\cite{dgl} presentan limitaciones para su integración en flujos de trabajo declarativos. \textit{Yagg}, aunque permite la generación aleatoria de expresiones, fue diseñado con un enfoque imperativo y carece de configuraciones avanzadas para la validación semántica de cadenas. \textit{DGL}, por otro lado, ofrece una configuración flexible de pesos en reglas de producción y documentación extensa, pero al ser un programa externo, su integración en entornos declarativos se ve afectada por la constante comunicación con el sistema operativo.
 
 Este proyecto propone la herramienta \textbf{Joy: \textit{Just Optimized Yielder}}, la cual permite a los desarrolladores definir gramáticas de manera declarativa usando \textit{EBNF} (\textit{Extended Backus-Naur Form}) y generar automáticamente herramientas de prueba para el desarrollo de un lenguaje de programación en \textit{Haskell}. Al utilizar un enfoque monádico\footnote[1]{Las mónadas son una estructura algebráica utilizada para manejar secuencias de operaciones que involucran contextos computacionales o efectos secundarios, como manejo de errores, estado, entrada/salida, o cálculos no determinísticos. En este proyecto principalmente se utilizaría para tener control del estado del programa durante el análisis sintáctico, así como describir la manipulación del flujo de la información generada aleatoriamente.} para el análisis sintáctico y la generación de pruebas, \textbf{Joy} ofrece una forma eficiente y modular de validar lenguajes de programación. Además, al integrar generadores basados en \textit{QuickCheck}\cite{quickcheck_manual}, se garantiza que las pruebas sean robustas y cubran una amplia gama de casos.
 
@@ -53,9 +53,9 @@ Desarrollar una herramienta llamada \textbf{Joy: \textit{Just Optimized Yielder}
 \subsubsection*{Objetivos Específicos}
 
 \begin{enumerate}
-\item Implementar un analizador sintáctico en \textit{Haskell} que interprete archivos \texttt{.joy} con gramáticas descritas en formato \textit{EBNF}. Éste formato a diferencia del estándar utilizado para el generador de analizadores sintácticos \textit{YACC}, tendría el objetivo de ser el punto de partida para el desarrollo, teniendo una estructura de fácil comprensión, y pueda funcionar así mismo como documentación para el lenguaje de programación.
+\item Desarrollar un analizador sintáctico en \textit{Haskell} para integrar archivos \texttt{.joy} con gramáticas en formato \textit{EBNF}, proporcionando una estructura comprensible y utilizable como documentación del lenguaje.
 \item Generar automáticamente código de \textit{Haskell} que incluya generadores de pruebas para cada regla de producción definida en la gramática. Estos generadores seguirían un enfoque basado en propiedades.
-\item Integrar generadores basados en \textit{QuickCheck} para garantizar la robustez de las pruebas.
+\item Incorporar \textit{QuickCheck} como base para la generación de pruebas basadas en propiedades, asegurando una validación exhaustiva de las gramáticas analizadas.
 \item Permitir la configuración de parámetros adicionales para restringir tipos de datos, determinar las reglas de producción a usar en los generadores, o determinar el tamaño de la longitud del árbol.
 \item Opcional: Implementar la capacidad de evaluar cadenas generadas mediante un intérprete configurable.
 \item Documentar y validar la herramienta mediante casos de estudio concretos.
@@ -80,11 +80,11 @@ Para validar la efectividad de \textit{Joy}, se proponen los siguientes casos de
   \item \textit{Objetivo:} Validar que los generadores produzcan expresiones correctas tanto sintácticamente como semánticamente con ayuda de un intérprete externo, como \textit{Racket}.
   \end{itemize}
 
-\item \textit{Programación implerativa}
+\item \textit{Programación imperativa}
 
   \begin{itemize}
   \item \textit{Descripción:} Un lenguaje completo, que cuente con la capacidad de generar procedimientos descritos de forma imperativa, expresiones \texttt{if}, ciclos \texttt{while}, \texttt{for}, definición de métodos, etc\ldots
-  \item \textit{Objetivo:} Comprobar que el sistema desarrollado es capaz de generar expresiones de un lenguaje con más especificaciones, y verificar la utilidad de los generadores para desarrollar pruebas específicas en el desarrollo éste lenguaje.
+  \item \textit{Objetivo:} Comprobar que el sistema desarrollado es capaz de generar expresiones de un lenguaje con más especificaciones, y evaluar la efectividad de los generadores de pruebas en el desarrollo y validación de un lenguaje de programación con características imperativas.
   \end{itemize}
   
 \end{enumerate}
@@ -95,31 +95,31 @@ Para validar la efectividad de \textit{Joy}, se proponen los siguientes casos de
 \item \textit{Investigación y Análisis}:
 
   \begin{itemize}
-  \item Revisión del estado del arte en herramientas de generación de pruebas y análisis sintáctico.
-  \item Estudio de bibliotecas de \textit{Haskell} relevantes (\textit{QuickCheck},\textit{State},etc\ldots).
-  \item Estudio de bibliotecas similares en otros lenguajes.
+  \item Revisar el estado del arte en herramientas de generación de pruebas y análisis sintáctico.
+  \item Profundizar sobre bibliotecas de \textit{Haskell} relevantes (\textit{QuickCheck},\textit{State},etc\ldots).
+  \item Investigar bibliotecas similares en otros lenguajes.
   \end{itemize}
 \item \textit{Diseño}:
 
   \begin{itemize}
-  \item Definición de la estructura sintáctica de los archivos \texttt{.joy}, que a diferencia de otros como el del lenguaje de especificación de \textit{Happy}\cite{happy_docs}, seguirá el estandar \textsc{Iso/Iec 14977} de \textit{EBNF} para una mejor comprensión de la gramática.
-  \item Diseño del analizador sintáctico basado en \textit{parsers} monádicos desde cero.
-  \item Diseño de los generadores de pruebas y su integración con \textit{QuickCheck}
+  \item Definir la estructura sintáctica de los archivos \texttt{.joy}, que a diferencia de otros como el del lenguaje de especificación de \textit{Happy}\cite{happy_docs}, seguirá el estandar \textsc{Iso/Iec 14977}\cite{ebnf} de \textit{EBNF} para una mejor comprensión de la gramática.
+  \item Diseñar el analizador sintáctico basado en \textit{parsers} monádicos desde cero.
+  \item Diseñar los generadores de pruebas y su integración con \textit{QuickCheck}
   \end{itemize}
 \item \textit{Implementación}:
 
   \begin{itemize}
-  \item Desarrollo del analizador sintáctico en \textit{Haskell}.
-  \item Implementación de la traducción automática de \textit{EBNF} a generadores aleatorios en \textit{QuickCheck}.
-  \item Integración de parámetros adicionales para restricciones en los generadores, como longitud de las cadenas generadas, exclusión de reglas de producción, pesos que determinen la frecuencia de las reglas de producción, entre otras.
-  \item Implementación opcional de la evaluación mediante intérpretes externos.
+  \item Desarrollar el analizador sintáctico en \textit{Haskell}.
+  \item Implementar la traducción automática de \textit{EBNF} a generadores aleatorios en \textit{QuickCheck}.
+  \item Integrar la especificación de parámetros adicionales para restricciones en los generadores, como longitud de las cadenas generadas, exclusión de reglas de producción, pesos que determinen la frecuencia de las reglas de producción, entre otras.
+  \item Implementar, de manera opcional, la evaluación mediante intérpretes externos.
   \end{itemize}
 \item \textit{Validación}:
 
   \begin{itemize}
-  \item Aplicación de los casos de estudio para validar la funcionalidad de \textbf{Joy}
+  \item Aplicar los casos de estudio para validar la funcionalidad de \textbf{Joy}.
 
-  \item Pruebas unitarias y de integración por cada componente
+  \item Realizar pruebas unitarias y de integración por cada componente.
 
     \begin{itemize}
     \item Comprobar que las expresiones generadas siguen la estructura sintáctica que se definió.
@@ -134,15 +134,15 @@ Para validar la efectividad de \textit{Joy}, se proponen los siguientes casos de
 \item \textit{Redacción del Trabajo de Tesis}
   
   \begin{itemize}
-  \item Redacción de la documentación técnica y del usuario.
-  \item Preparación de ejemplos y tutoriales.
+  \item Redactar de la documentación técnica y del usuario.
+  \item Preparar ejemplos y tutoriales.
   \end{itemize}
 
 \item \textit{Evaluación y Mejora}:
 
   \begin{itemize}
-  \item Revisión de los resultados.
-  \item Identificación de áreas de mejora y optimización.
+  \item Revisar los resultados.
+  \item Identificar áreas de mejora y optimización.
   \end{itemize}
 \end{enumerate}
 
@@ -158,7 +158,7 @@ Se espera que \textbf{Joy} sea una herramienta funcional y eficiente que cumpla 
 \item Validación exitosa de cada componente, mediante los casos de estudio propuestos y las pruebas unitarias mencionadas.
 \end{itemize}
 
-Además, se espera que \textbf{Joy} sirva como una contribución significativa al campo de desarrollo de lenguajes de programación, promoviendo el uso de técnicas declarativas y funcionales.
+Asimismo, se espera que \textbf{Joy} sirva como una contribución significativa al campo de desarrollo de lenguajes de programación, promoviendo el uso de técnicas declarativas y funcionales.
 
 \section*{Índice Propuesto}
 
